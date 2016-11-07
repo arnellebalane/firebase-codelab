@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Awesome Chat Application</title>
+
+        <style>
+            .user-info {
+                display: flex;
+                align-items: center;
+            }
+
+            .user-avatar {
+                width: 50px;
+                border-radius: 50%;
+            }
+
+            .user-name {
+                font-size: 20px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Awesome Chat Application</h1>
+        <button id="login">Login with Google</button>
+
+        <div class="user-info">
+            <img src="" alt="" class="user-avatar">
+            <p class="user-name"></p>
+        </div>
+
+        <form action="#">
+            <input type="text" name="messsage">
+            <button>Send Message</button>
+        </form>
+
+        <ul id="messages"></ul>
+
+        <script src="https://www.gstatic.com/firebasejs/3.5.2/firebase.js"></script>
+        <script>
+            firebase.initializeApp({
+                apiKey: 'AIzaSyCdqHyfOgwCpW7UTj1sVqZ9Q4cCbZhE8qs',
+                authDomain: 'fir-codelab-43c6f.firebaseapp.com',
+                databaseURL: 'https://fir-codelab-43c6f.firebaseio.com'
+            });
+
+            document.querySelector('#login').addEventListener('click', function() {
+                var provider = new firebase.auth.GoogleAuthProvider();
+                firebase.auth().signInWithPopup(provider).then(function() {
+                    console.log('YOU ARE NOW LOGGED IN YAY!');
+
+                    var name = firebase.auth().currentUser.displayName;
+                    var avatar = firebase.auth().currentUser.photoURL;
+                    document.querySelector('.user-avatar').src = avatar;
+                    document.querySelector('.user-name').textContent = name;
+                });
+            });
+
+            if (firebase.auth().currentUser) {
+                var name = firebase.auth().currentUser.displayName;
+                var avatar = firebase.auth().currentUser.photoURL;
+                document.querySelector('.user-avatar').src = avatar;
+                document.querySelector('.user-name').textContent = name;
+            }
+
+            document.querySelector('form').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                var message = document.querySelector('input').value;
+                if (message.length > 0) {
+                    firebase.database().ref('messages').push(message);
+                    document.querySelector('input').value = '';
+                }
+            });
+
+            var messagesContainer = document.querySelector('#messages');
+            firebase.database().ref('messages').on('child_added', function(data) {
+                var message = data.val();
+                var renderedMessage = '<li>' + message + '</li>'
+                messagesContainer.innerHTML = renderedMessage + messagesContainer.innerHTML;
+            });
+        </script>
+    </body>
+</html>
